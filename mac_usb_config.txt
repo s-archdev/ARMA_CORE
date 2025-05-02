@@ -1,0 +1,17 @@
+# USB Executable Loader Configuration
+
+# Directory where executables are stored (relative to USB root)
+executable_dir = executables
+
+# Log file path (relative to USB root)
+log_path = logs/loader.log
+
+# Whether to require macOS authorization before execution (true/false)
+require_auth = true
+
+# Allowed file extensions (up to 10)
+allowed_ext1 = bin
+allowed_ext2 = sh
+allowed_ext3 = py
+allowed_ext4 = app
+allowed_ext5 = command

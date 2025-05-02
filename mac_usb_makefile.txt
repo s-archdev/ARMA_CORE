@@ -1,0 +1,45 @@
+CC = clang
+CFLAGS = -Wall -Wextra -O2
+LDFLAGS = -framework CoreFoundation -framework Security
+
+TARGET = mac_usb_loader
+SOURCES = mac_usb_loader.c
+OBJECTS = $(SOURCES:.c=.o)
+
+.PHONY: all clean install
+
+all: $(TARGET)
+
+$(TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -f $(TARGET) $(OBJECTS)
+
+# Install on USB drive (replace /Volumes/USB_NAME with your USB drive path)
+install: $(TARGET)
+	@echo "Installing $(TARGET) to USB drive..."
+	@if [ -d "/Volumes/USB_NAME" ]; then \
+		mkdir -p "/Volumes/USB_NAME/executables" "/Volumes/USB_NAME/config" "/Volumes/USB_NAME/logs"; \
+		cp $(TARGET) "/Volumes/USB_NAME/"; \
+		cp config/loader.conf "/Volumes/USB_NAME/config/"; \
+		chmod +x "/Volumes/USB_NAME/$(TARGET)"; \
+		echo "Installation complete."; \
+	else \
+		echo "Error: USB drive not found at /Volumes/USB_NAME"; \
+		echo "Please mount your USB drive and update the Makefile."; \
+		exit 1; \
+	fi
+
+# Create a disk image for distribution
+disk_image: $(TARGET)
+	@echo "Creating disk image..."
+	mkdir -p build/disk_image
+	mkdir -p build/disk_image/executables build/disk_image/config build/disk_image/logs
+	cp $(TARGET) build/disk_image/
+	cp config/loader.conf build/disk_image/config/
+	hdiutil create -volname "Mac USB Loader" -srcfolder build/disk_image -ov -format UDZO build/MacUSBLoader.dmg
+	@echo "Disk image created at build/MacUSBLoader.dmg"
